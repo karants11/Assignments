@@ -8,7 +8,7 @@ func rightJustify(s: String) {
        spaceNeeded += " "
    }
    //print(spaceNeeded.length)
-   print(spaceNeeded+s)
+   print(spaceNeeded + s)
 
 }
 rightJustify(s: "karan")
