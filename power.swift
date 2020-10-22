@@ -14,8 +14,16 @@ func power(_ x: Int, _ n: Int) -> Int {
 	if n == 0 {
         return 1
     }
-
-    return ( x * power(x, n-1))
+    
+	if (n%2 == 0){
+         //print("via even")
+        var m = power(x,n/2)
+        return(m * m)
+    } 
+    else{
+    //print("via odd")
+    return ( x * power(x,n-1))
+    }
 }
 
-print(power(2, 5))
+print(power(2,10))
