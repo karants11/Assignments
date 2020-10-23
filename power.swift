@@ -4,6 +4,7 @@ Write a recursive function called power that takes a number x and an integer n a
 Hint: A recursive definition of this operation is x^n = x · x^(n−1). Also, remember that anything raised to the zeroth power is 1.
 
 Optional challenge: you can make this method more efficient, when n is even, using x^n = (x^(n/2))^2.
+
 */
 
 
