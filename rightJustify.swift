@@ -1,5 +1,6 @@
 // Assignment 1 Right justify
 
+
 func rightJustify(s: String) {
    var spaceNeeded: String = ""
    var  strLen = 70 - s.length
