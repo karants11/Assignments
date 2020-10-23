@@ -1,3 +1,5 @@
+//////Fermat
+
 import Foundation
 
 func checkFermat(_ a: Int,_ b:Int,_ c: Int,_ n:Int) {
