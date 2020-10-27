@@ -21,10 +21,9 @@ var arrayOfDictionaries =
 
 func arrayOfDictionariesToArray(initialArrayOfDictionaries:[[String : Any]]) -> [Any] {
     var finalArray = [Any]()
-	//let keyArray1 = initialArrayOfDictionaries[0].keys
-    //print(keyArray1)
+
     for i in 0..<initialArrayOfDictionaries.count {
-        let keyArray = [String](initialArrayOfDictionaries[i].keys)		// Array to store key value to append
+        let keyArray = [String](initialArrayOfDictionaries[i].keys)
 
         if let value = initialArrayOfDictionaries[i][keyArray[0]] {
             finalArray.append(value)
