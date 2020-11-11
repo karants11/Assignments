@@ -64,11 +64,15 @@ class Student: Person {
 	let libraryCardNumber: String
 	var marks = [String: Float]()
 
-	init(name: String, age: Int, usnNumber: String, currentCGPA: Float, libraryCardNumber: String) {
+	init(name: String, age: Int, usnNumber: String, libraryCardNumber: String) {
 		self.usnNumber = usnNumber
-		self.currentCGPA = currentCGPA
+		currentCGPA = 0.0
 		self.libraryCardNumber = libraryCardNumber
 		super.init(name: name, age: age)
+	}
+
+	func fetchCGPA() -> Float {
+		return currentCGPA
 	}
 
 	func writeAssignments() {
@@ -108,7 +112,7 @@ class Branch {
 		for (_, value) in student.marks {
 				sum += value
 		}
-		
+		student.currentCGPA = (sum/Float(student.marks.count))/9.5
 		return (sum/Float(student.marks.count))/9.5
 	}
 
@@ -126,7 +130,6 @@ class Branch {
 		// Student have only access to read the data not modify
 	}
 }
-
 
 class College {
   
@@ -235,32 +238,48 @@ class University {
 
 }
 
-let student001 = Student(name: "ABD", age: 21,  usnNumber: "4su16ec001", currentCGPA: 8.0, libraryCardNumber: "001A")
-let student002 =  Student(name: "MNO", age: 21,  usnNumber: "4su16ec002", currentCGPA: 8.8, libraryCardNumber: "002A")
+// create a universtiy
 
-let staff1 = Staff(name: "XYZ", age: 35, isTeaching: false, designation: "Lab Assistant", qualification: "Degree")
-let staff2 = Staff(name: "MKJ", age: 45, isTeaching: false, designation: "Lab supervisor", qualification: "Degree")
+var vtu = University(name: "VTU", yearOfEstablishment: 1990, location: "Belgavi")
 
-var faculty1 = Faculty(name: "Dr. ABC", age: 42, department: "EC", handlingSubjects: ["NA", "FT"], isMentor: true, menteeList: [student001, student002], anySpecialRole: "Nss Coordinstor", experience: 5.5, designation: "Ast. Proffessor", qualification: "MTech")
-var faculty2 = Faculty(name: "Dr. DEC", age: 45, department: "EC", handlingSubjects: ["NA", "FT", "AE"], isMentor: true, menteeList: [student001, student002], anySpecialRole: nil, experience: 7.5, designation: "Proffessor", qualification: "Phd")
-
+// create a college
 var ec = Branch(name: "EC", headOfDepartment: "Dr. ECE" )
 var cs = Branch(name: "CS", headOfDepartment: "Dr. CSE")
 var mech = Branch(name: "ME", headOfDepartment: "Dr. Mech")
 
 var sdmit = College(name: "SDMIT", collegeID: "4SU", principalName: "Dr. SDMIT", details: "in Ujire", branches: [ec, cs, mech])
 
+// create students
+
+let student001 = Student(name: "ABD", age: 21,  usnNumber: "4su16ec001", libraryCardNumber: "001A")
+let student002 =  Student(name: "DEF", age: 21,  usnNumber: "4su16ec002", libraryCardNumber: "002A")
+let student003 =  Student(name: "GHI", age: 21,  usnNumber: "4su16ec003", libraryCardNumber: "003A")
+
+
+//create staffs
+
+let staff1 = Staff(name: "XYZ", age: 35, isTeaching: false, designation: "Lab Assistant", qualification: "Degree")
+let staff2 = Staff(name: "MKJ", age: 45, isTeaching: false, designation: "Lab supervisor", qualification: "Degree")
+
+// create Faculty
+
+var faculty1 = Faculty(name: "Dr. ABC", age: 42, department: "EC", handlingSubjects: ["NA", "FT"], isMentor: true, menteeList: [student001, student002], anySpecialRole: "Nss Coordinstor", experience: 5.5, designation: "Ast. Proffessor", qualification: "MTech")
+var faculty2 = Faculty(name: "Dr. DEC", age: 45, department: "EC", handlingSubjects: ["NA", "FT", "AE"], isMentor: true, menteeList: [student001, student002], anySpecialRole: nil, experience: 7.5, designation: "Proffessor", qualification: "Phd")
+
+//  recruit faculties and staffs
 sdmit.recruitFaculty(faculty: faculty1, prefferedBranch: ec)
 sdmit.recruitFaculty(faculty: faculty2, prefferedBranch: cs)
 
-sdmit.admitStudent(student: student001, prefferedBranch: ec)
-sdmit.admitStudent(student: student002, prefferedBranch: cs)
+// admit students
 
-var vtu = University(name: "VTU", yearOfEstablishment: 1990, location: "Belgavi")
+sdmit.admitStudent(student: student001, prefferedBranch: ec)
+sdmit.admitStudent(student: student002, prefferedBranch: ec)
+sdmit.admitStudent(student: student003, prefferedBranch: ec)
+//sdmit.admitStudent(student: student002, prefferedBranch: cs)
+
+// add college to universtiy
 vtu.addCollege(college: sdmit, prefferedCollegeID: sdmit.collegeID)
 
-ec.allotMark(student: student001, marks:["LTE": 52, "OFC": 48, "Radar": 50])
-print(vtu.listOfColleges)
-print(student001.marks)
+// departmentwill allocate marks to the students
 
-print(ec.calculateCGPA(student: student001))
+ec.allotMark(student: student001, marks:["LTE": 52, "OFC": 48, "Radar": 50])
