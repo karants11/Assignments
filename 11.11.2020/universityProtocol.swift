@@ -22,6 +22,11 @@ class Staff: Person {
 	}
 }
 
+protocol BranchProtocolForStudent {
+	func requestToCheckInternalMarks()
+	func requestToChekAttendancePercentage()
+}
+
 class Faculty: Staff {
 	let department: String
 	var handlingSubjects = [String]()
@@ -58,12 +63,13 @@ class Faculty: Staff {
 	}
 }
 
-class Student: Person {
+class Student: Person, BranchProtocolForStudent {
 	let usnNumber: String
 	var currentCGPA: Float
 	let libraryCardNumber: String
 	var marks = [String: Float]()
-
+	weak var belongsToBranch: Branch?
+	
 	init(name: String, age: Int, usnNumber: String, libraryCardNumber: String) {
 		self.usnNumber = usnNumber
 		currentCGPA = 0.0
@@ -82,20 +88,32 @@ class Student: Person {
 	func takeTest() {
 		// write Internals
 	}
+
+	func requestToCheckInternalMarks() {
+		// request the corresponding branch to display internal assessment marks of each subject
+		if let branch = self.belongsToBranch { 
+			print("working")
+			branch.displayInternalMarks(student: self)
+		}
+	}
+
+	func requestToChekAttendancePercentage() {
+		// request the corresponding branch to give percentage of attendace of each subject
+	}
 }
 
 protocol CollageProtocol {
 	func eventDetails()
-	func sendAttendanceDetail()
-	func sendInternalAssessmentMarks()
+	func sendAttendanceDetail() -> [String: Int]
+	func sendInternalAssessmentMarks() -> [String: [String: Float]]
 }
-
 
 class Branch: CollageProtocol {
 	let name: String
 	var headOfDepartment: String
 	var students = [String: Student]()    // USN : student detail
 	var faculties = [Faculty]()
+	var internalMarks = [String: [String: Float]]()
 	var staffCount: Int
 	var studentCount: Int
   
@@ -132,22 +150,34 @@ class Branch: CollageProtocol {
 		// question papaer should be checked and distributed for all the students
 	}
 
-	func attendaceDetail(student: Student) {
+	func updateInternalMarks(student: Student) {
 		// attandacedetail every student should be stored
 		// Student have only access to read the data not modify
+		self.internalMarks[student.usnNumber] = student.marks
 	}
 
 	func eventDetails() {
 		// To Recieve the event details from the college
 	}
 
-	func sendAttendanceDetail() {
+	func sendAttendanceDetail() -> [String: Int] {
 		// send attendance details of all the students to the college
+		// return attendance status of individual students
+		return [String: Int]()
+	}
 
-	}
-	func sendInternalAssessmentMarks() {
+	func sendInternalAssessmentMarks() -> [String: [String: Float]] {
 		// send Internal assessment marks of all the student to the college
+		return internalMarks
 	}
+
+	func displayInternalMarks(student: Student) {
+		//this function will print the internal assessmentmark of perticular student
+		if let iaMarks = self.internalMarks[student.usnNumber] {
+			print(iaMarks)
+		}///// this part is not working don't know why
+	}
+
 }
 
 class College: UniversityProtocol, UniversityRecieveProtocol {
@@ -156,7 +186,7 @@ class College: UniversityProtocol, UniversityRecieveProtocol {
 	var collegeID: String
 	var principalName: String
 	var details: String
-	var branches = [Branch]()
+	var branches = [CollageProtocol]()
 	var staffs = [Staff]()
 	var faculties = [Faculty]()
 	var students = [Student]()
@@ -176,6 +206,7 @@ class College: UniversityProtocol, UniversityRecieveProtocol {
 		//fill detail of student
 		//and issue library card sor student
 		prefferedBranch.students[student.usnNumber] = student
+		student.belongsToBranch = prefferedBranch
 	}
 
 	func recruitStaff(staff: Staff) {
@@ -236,6 +267,11 @@ class College: UniversityProtocol, UniversityRecieveProtocol {
 		}
 	}
 
+	func updateInternalMarksOfBranch(branch: Branch) {
+		print(branch.sendInternalAssessmentMarks()) /// actually not printing, this should me manupulated as required
+		// this dictionary can either be stored or used as requirement
+	}
+
 }
 
 class Details {
@@ -263,7 +299,7 @@ protocol UniversityRecieveProtocol {
 
 class University {
 	var details = Details()
-	var listOfColleges = [String: College]()
+	var listOfColleges = [String: UniversityProtocol]()
 	
 	init(name: String, yearOfEstablishment: Int, location: String) {
 		self.details.name = name
@@ -280,7 +316,8 @@ class University {
 	
 	func setMaximumIntake() -> [String: Int] {
 		// set maxinum intakeCount of all the collages in the collage list appropriately
-		return ["semester": 0]
+		return ["ec": 120, "cs": 120, "mech": 60] /// hard coded
+		// this should be calculated for each colleges based on some reules
 	}
 	
 
@@ -312,7 +349,7 @@ class University {
 
 var vtu = University(name: "VTU", yearOfEstablishment: 1990, location: "Belgavi")
 
-// create a college
+// create a branches for a college and add it to a college
 var ec = Branch(name: "EC", headOfDepartment: "Dr. ECE" )
 var cs = Branch(name: "CS", headOfDepartment: "Dr. CSE")
 var mech = Branch(name: "ME", headOfDepartment: "Dr. Mech")
@@ -353,14 +390,34 @@ vtu.addCollege(college: sdmit, prefferedCollegeID: sdmit.collegeID)
 sdmit.sendStudentsListToUniversity()
 
 // departmentwill allocate marks to the students
-ec.allotMark(student: student001, marks:["LTE": 52, "OFC": 48, "Radar": 50])
+ec.allotMark(student: student001, marks: ["LTE": 12, "OFC": 15, "Radar": 18])
+ec.allotMark(student: student002, marks: ["LTE": 18, "OFC": 18, "Radar": 19])
 
+// update marks of all ec branch students to the branch register
+for (key, _) in ec.students {
+	if let temp = ec.students[key] {
+		ec.updateInternalMarks(student: temp)
+	}
+}
+
+// to print to which university college is belonging
 if let temp = sdmit.belongsToUniversity {
 	print(temp.details.name)
 }
+
+// send this updated detais to the college
+
+sdmit.updateInternalMarksOfBranch(branch: ec)
+
+student001.requestToCheckInternalMarks()
 
 //////////////////////////////////////////////////////////////////
 //// To check whether collegeis adding itself to university///////
 let collegeTemp = College(name: "tempCollege", collegeID: "temp", principalName: "Dr. temp", details: "unavailable", branches: [])
 collegeTemp.sendStudentsListToUniversity()
 /////////////////////////////////////////////////////////////////
+//// To check student001 belongs to which branch/////////////////
+if let temp = student001.belongsToBranch {
+	print(temp.name)
+}
+////////////////////////////////////////////////////////////////
