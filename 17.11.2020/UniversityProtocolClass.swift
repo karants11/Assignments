@@ -3,9 +3,20 @@ protocol UniversityRecieveProtocol {
 	func sendStudentList() -> [String: [String: Student]]
 }
 
+protocol UniversitySendProtocol {
+	func recieveTimeTable(timetable: [String: String])
+	func maxIntakeCount(intakeCount: [String: Int])
+	func recieveStudentResults(result: [String: Int])
+}
+
 protocol CollegeRecieveProtocol {
- // protocol that are necessaryfor recieving data from all the branches
+ // protocol that are necessary for recieving data from all the branches
  func sendStudentListToCollege() -> [String: Student]
+}
+
+protocol CollegeSendProtocol {
+	// protocols that are necessary for sending data to the branches
+	func recieveEventDetails(events: [String: String])
 }
 
 class Person {
@@ -48,11 +59,18 @@ class Branch {
 	}
 }
 
-extension Branch: CollegeRecieveProtocol {
+extension Branch: CollegeRecieveProtocol, CollegeSendProtocol {
  
  func sendStudentListToCollege() -> [String: Student] {
 	 return self.students
  }
+
+ func recieveEventDetails(events: [String: String]) {
+	 // display the event details in the department notice board
+	 print("\(self.name) notice board")
+	 print(events)
+ }
+
 }
 
 class College {
@@ -82,15 +100,47 @@ class College {
 		//print(usn)
 		return usn
 	}
+
+	func addBranch(branch: Branch) {
+		self.branches.append(branch)
+	}
+
+	func sendEventDetail() {
+		let events = ["14/11/2020": "naraka chaturdashi", "15/11/2020": "deepavali", "16/11/2020": "Goupooja"]
+		for branch in branches {
+			branch.recieveEventDetails(events: events)
+		}
+	}
 }
 
-extension College: UniversityRecieveProtocol {
+extension College: UniversityRecieveProtocol, UniversitySendProtocol {
+	
 	func sendStudentList() -> [String: [String: Student]] {
 		var studentList = [String: [String: Student]]()
 		for branch in self.branches {
 			studentList[branch.name] = branch.sendStudentListToCollege()
 		}
 		return studentList
+	}
+
+	func recieveTimeTable(timetable: [String: String]) {
+		// timetable from the university has been recieved put it in the notice board or send it to individual student
+		print("\(self.name) notice board")
+		print(timetable) // just as displayed un the notice board
+	}
+
+	func maxIntakeCount(intakeCount: [String: Int]) {
+		// max intake count of all the branch is pblished by the university
+		// display it in the notice board or send it to the respective branches
+		print("\(self.name) notice board")
+		print(intakeCount)
+	}
+
+	func recieveStudentResults(result: [String: Int]) {
+		// university will declare the result
+		// displayit in the notice board or send it to individual student
+		print("\(self.name) notice board")
+		print(result)
 	}
 
 }
@@ -109,7 +159,7 @@ class Details {
 
 class University {
 	var details = Details()
-	var listOfColleges = [String: UniversityRecieveProtocol]()
+	var listOfColleges = [String: College]()
 	var studentList = [String: [String: [String: Student]]]()    // [collegeName: [branch:[usnNumber: StudentDetail]]]
 	
 	init(name: String, yearOfEstablishment: Int, location: String) {
@@ -127,7 +177,36 @@ class University {
 		self.studentList[college.name] = college.sendStudentList()
 		//print(studentList)
 	}
+
+	func sendTimeTable() {
+		// create approprite timtable with date and exams/ subject code and assign it to a variable
+		let timetable = ["18/11/2020": "20EC11", "19/11/2020": "20EC12", "20/11/2020": "20EC13", ]
+		for (_, college) in listOfColleges {
+			college.recieveTimeTable(timetable: timetable)
+		}
+	}
+
+	func sendIntakeCount() {
+		// intakeCount to all the colleges and each branch should be calculated and sent to the respetive colleges
+		// here assumed as all the colleges have same intake respective branches
+		let intake = ["ECE": 120, "CSE": 120, "ISE": 60, "EEE": 60, "ME": 60, "CV": 60]
+		for (_, college) in listOfColleges {
+			college.maxIntakeCount(intakeCount: intake)
+		}
+	}
+
+	func announceResult() {
+		// result of all the student in all the colleges should be declared
+		// marks will be dictionay of name of subject and marks for each usnNumber
+		// for demo purpose a dictionary of usnNumber and percentage is sent to the college
+		let result = ["4SU2020EC001": 86, "4SU2020EC002": 90, "4SU2020CS001": 90, "4SU2020CS002": 95, "4SU2020IS001": 80, "4SU2020IS002": 95]
+		for (_, college) in listOfColleges {
+			college.recieveStudentResults(result: result)
+		}
+	}
+
 }
+
 
 var vtu = University(name: "VTU", yearOfEstablishment: 1969, location: "Belgavi")
 
@@ -158,3 +237,9 @@ sdmit.admitStudent(student: student5, prefferedBranch: ise)
 sdmit.admitStudent(student: student6, prefferedBranch: ise)
 
 vtu.recieveStudentList(college: sdmit)
+
+vtu.sendTimeTable()
+vtu.sendIntakeCount()
+vtu.announceResult()
+
+sdmit.sendEventDetail()
