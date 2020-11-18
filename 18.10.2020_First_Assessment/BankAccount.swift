@@ -3,6 +3,7 @@ class Detail {
 	let name: String
 	var mobileNumber: String?
 	var eMailID: String?
+	var isTransferable: Bool?
 
 	init(name: String) {
 		self.name = name
@@ -38,15 +39,15 @@ class Account {
 	// Protocol functions should be called only from Manager class/
 	func depositeAmount(amount: Int) {
 		self.amount += amount
-		print("\(amount) Rupees deposited, Available Balance is \(self.amount) Rupees")
+		print("\(amount) Rupees deposited to account number \(self.accountNumber), Available Balance is \(self.amount) Rupees")
 	}
 
 	func withdrawAmount(amount: Int) {
 		if ((self.amount - amount) >= 0) {
 			self.amount -= amount
-			print("\(amount) Rupees withdrawn, Available Balance is \(self.amount) Rupees")
+			print("\(amount) Rupees withdrawn form accountNumber \(self.accountNumber), Available Balance is \(self.amount) Rupees")
 		}else {
-			print("Insufficient Funds to withdraw")
+			print("Insufficient Funds in accountNumber \(self.accountNumber) to withdraw")
 			print("Available Balance is \(self.amount)")
 		}		
 	}
@@ -102,7 +103,7 @@ class DepositAccount: Account, AccountProtocol {
 			self.rateOfInterest = 0.1
 	}
 	override func withdrawAmount(amount: Int) {
-		print("unable to withdraw amount, This is a Deposit Account")
+		print("unable to withdraw amount, \(self.accountNumber) is a Deposit Account")
 	}
 
 	override func accrueInterest() {
@@ -113,7 +114,7 @@ class DepositAccount: Account, AccountProtocol {
 class FDAccount: DepositAccount {
 
 	override func depositeAmount(amount: Int) {
-		print("This is a FD account, Can be deposited only once")
+		print("\(self.accountNumber) is a FD account, Can be deposited only once")
 	}
 
 	override func printRecentTransactions() {
@@ -156,6 +157,8 @@ protocol ManagerProtocol {
 
 	func depositeAmount(amount: Int)
 	func withdrawAmount(amount: Int)
+
+	func accrueInterest() // for calcualating intrest 
 } 
 
 class AccountManager {
@@ -207,18 +210,25 @@ class AccountManager {
 		account.withdrawAmount(amount: amount)
 	}
 
-	func addInterest(account: Account) {
-		account.accrueInterest()
-	}
-	
+	func addInterest() {
+		// adding intrest to consumer should be periodically done 
+		// here for illustration purpose directly funcion is called
+		// for i in 0...365.days
+			//delay()
+		for (_, account) in self.accountList{
+			account.accrueInterest()
+		}	
+	}	
 }
 
+var manager = AccountManager()
 
 var consumer1 = Account(name: "Mr. ABC", initialAmount: 500)
-var manager = AccountManager()
 var consumer2 = Account(name: "Mr. MNO", initialAmount: 500)
+
 manager.addAccount(account: consumer2)
 manager.addAccount(account: consumer1)
+
 manager.dispalyDetails(account: consumer1)
 consumer1.detail.updateEMail(eMailID: "abc@robosoftin.com")
 manager.dispalyDetails(account: consumer1)
@@ -246,5 +256,9 @@ manager.withdrawAmount(account: consumerReccur, amount: 500)
 print(manager.accountList)
 
 manager.queryCurrentBalance(account: consumerFD)
-manager.addInterest(account: consumerFD)
+manager.queryCurrentBalance(account: consumer1)
+
+manager.addInterest()
+
 manager.queryCurrentBalance(account: consumerFD)
+manager.queryCurrentBalance(account: consumer1)
